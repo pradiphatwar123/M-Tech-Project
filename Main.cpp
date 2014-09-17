@@ -1,14 +1,14 @@
 /*********************************************************************************************************
 
-Project           :  Synchronous Distributed System
+Project           :  Build Simulator For Synchronous Distributed System
 
 File name         :  main.CPP
 
 Description       :  
 
-Programmers       :  (1) Pradip Hatwar     (CS13M022)
-                     (2) Sachin Balchim    (CS13M0 )
-                     (3) Bibekananda Raul  (CS13M0 )
+Programmers       :  (1) Sachin Balchim    (CS13M010)
+                     (2) Bibekananda Raul  (CS13M011)
+		     (3) Pradip Hatwar     (CS13M022)
 
 Compiler name     :  
 
@@ -25,24 +25,14 @@ History           :
 
 *********************************************************************************************************/
 
-
-#include "project.h"
-
-
-
-
-/********
-
 #include<iostream>
 #include<cstdlib>
 #include<ctype.h>
 #include<malloc.h>
 #include<fstream>
 #include<string.h>
-#include<math.h>
-#include<cstdlib.h>
 
- 
+#include "Graph.h"
 
 int 	ValidateCmdline();
 int 	ValidateFile();
@@ -50,16 +40,12 @@ int 	ValidateInput();
 void	ReadInputs();
 int 	WriteOutput();
 
-******/
-
-Distributed_System DS;
-	Node node;
-
 
 int main()
 {
 	
-   
+	Distributed_System DS;
+	
 	ValidateCmdline();
  	
 	ValidateFile();
@@ -85,7 +71,7 @@ Outputs                  :
 
 Description              :  
 *******************************************************************************************************/
-int Validate_Cmdline()
+int ValidateCmdline()
 {
 	int 	error=0;
 	

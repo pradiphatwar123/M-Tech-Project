@@ -1,31 +1,31 @@
 graph G {
 // nodes
-run;
-intr;
-intro;
-runbl;
-kernel;
-zombie;
-sleep;
-runmem;
-swap;
-runswap;
-new;
+1;
+2;
+3;
+4;
+5;
+6;
+7;
+8;
+9;
+10;
+11;
 // edges
-run -- intr [label="50"];
-intr -- runbl [label="30"];
-runbl -- run [label="23"];
-run -- kernel [label="46"];
-kernel -- zombie [label="12"];
-kernel -- sleep [label="67"];
-kernel -- runmem [label="63"];
-sleep -- swap [label="23"];
-swap -- runswap [label="45"];
-swap -- intro [label="45"];
-runswap -- new [label="50"];
-runswap -- runmem [label="89"];
-runswap -- runbl [label="89"];
-new -- runmem [label="12"]; 
-sleep -- runmem [label="7"];
-zombie -- new [label="7"];
+1 -- 2 [label="50"];
+2 -- 4 [label="30"];
+4 -- 1 [label="23"];
+1 -- 5 [label="46"];
+5 -- 6 [label="12"];
+5 -- 7 [label="67"];
+5 -- 8 [label="63"];
+7 -- 9 [label="23"];
+9 -- 10 [label="45"];
+9 -- 3 [label="45"];
+10 -- 11 [label="50"];
+10 -- 8 [label="89"];
+10 -- 4 [label="89"];
+11 -- 8 [label="12"]; 
+7 -- 8 [label="7"];
+6 -- 11 [label="7"];
 }

@@ -127,4 +127,3 @@ int Node :: IsNeighbour( Node *xyzNode)
 	return 0;
 
 }
-

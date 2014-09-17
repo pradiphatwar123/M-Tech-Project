@@ -21,7 +21,7 @@ List of functions : (1)  int 	main(int argc, char *argv[])
 		    (4)  int 	ValidateInput();
 		    (5)  void	ReadInputs();	
 		    (6)  int	WriteOutput();	
-                    
+		    (7)  void Extract_EdgeN_Weights( char *, char *);  \\                   
 History           :  
 
 *********************************************************************************************************/
@@ -43,7 +43,7 @@ int 	ValidateFile( char * );
 int 	ValidateInput( char *, int );
 void	ReadInputs();
 int 	WriteOutput();
-
+void Extract_EdgeN_Weight( char *, char *);  //
 
 int main( int argc, char *argv[] )
 {
@@ -71,11 +71,11 @@ int main( int argc, char *argv[] )
 		cout << "Failed to validate file  " << inputfile  << ", Exiting....." << endl;
 		exit(-1);
 	}
- 	
-//	ValidateFile();
- 	
-//	ValidateInput();
+
+	Extract_EdgeN_Weight( inputfile, outputfile);  //
 	
+	 	
+
 	ReadInputs();
  	
 		
@@ -514,6 +514,62 @@ Outputs                  :
 
 Description              :  
 *********************************************************************************************************/
+
+void Extract_EdgeN_Weight( char *inputfile, char *outputfile )
+{
+	int N = 1024;
+	char line[N];
+	string str;
+	stringstream ss;
+	
+	ifstream inpStrm;
+	ofstream outStrm;
+	
+	inpStrm.open(inputfile, ios::in );
+	outStrm.open("Extracted_EdgeN_Weight" , ios::in | ios::out | ios::trunc );
+	while( inpStrm )
+	{
+		inpStrm.getline(line, 1023, '\n');
+		str = line;                 
+		cout << str << endl;          
+		if( str.compare("// edges") == 0 )         // read the input lines till "// edges"
+		{
+			break;
+		}
+	}
+
+	while(inpStrm)
+	{
+		inpStrm.getline( line, 1023, '\n');
+	
+		if( line[0] == '}')
+			break;
+
+		for( int i = 0; (i < 1024) && ( line[i] != ';' ) ; i++ )
+		{
+			while( isdigit(line[i]))
+			{
+				outStrm<< line[i];
+				
+				i++;
+			}	
+			outStrm << " ";
+		}
+		outStrm << "\n";
+	}
+	
+}
+
+
+/*********************************************************************************************************
+Function Name            : 
+
+Inputs                   : 
+
+Outputs                  : 
+
+Description              :  
+*******************************************************************************************************/
 
 void ReadInputs()
 {

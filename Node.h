@@ -3,9 +3,10 @@ class Node
 
 	public :
 
-		unsigned int time;
 		unsigned int node_id;
-		
+		Node *next;	
+		unsigned int time;
+				
 		struct Connection_Queue
 		{
 			Node *from;

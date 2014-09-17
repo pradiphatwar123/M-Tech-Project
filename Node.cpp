@@ -1,56 +1,6 @@
-#include "project.h"
+#include<iostream>
+#include "Node.h"
 
-
-
-Node node;
-
-/*******
-
-class Node
-{
-	private :
-
-		unsigned int time;
-		unsigned int node_id;
-		
-		struct Connection_Queue
-		{
-			Node *from;
-			Node *to;
-			unsigned int time;
-		}Node=NULL;
-
-		
-		struct Message_Queue
-		{
-			Node *from;
-			char *message;
-			unsigned int time;
-		}Node=NULL;
-
-		void Send_Message( Node *target, int Message_Type, char *Message);
-
-		void Receive_Message( Node *from, int Message_Type, char *Message );
-
-		void Process_Received_Message( Node *origin , int Message_Type, char *Message );
-
-		void Broadcast_Message_To_Neighbours( char *Message, int Message_Type );		
-	
-		void Broadcast_Message_To_All_Nodes( char *Message, int Message_Type );	
-
-		void Find_Neighbours( int Node_Id);
-
-		int IsNeighbour( Node *xyzNode);
-
-		struct Remove_Message_From_Queue
-		{
-			Node *to;
-			unsigned int time;
-		};
-		
-};
-
-****/
 
 /*********************************************************************************************************
 Function Name            : 
@@ -62,7 +12,7 @@ Outputs                  :
 Description              :  
 *********************************************************************************************************/
 
-void Send_Message( Node *target, int Message_Type, char *Message)
+void Node :: Send_Message( Node *target, int Message_Type, char *Message)
 {
 
 
@@ -81,7 +31,7 @@ Outputs                  :
 Description              :  
 *********************************************************************************************************/
 
-void Receive_Message( Node *from, int Message_Type, char *Message )
+void Node :: Receive_Message( Node *from, int Message_Type, char *Message )
 {
 
 
@@ -98,25 +48,7 @@ Outputs                  :
 Description              :  
 *********************************************************************************************************/
 
-void Process_Received_Message( Node *origin , int Message_Type, char *Message )
-{
-
-
-
-
-}
-
-/*********************************************************************************************************
-Function Name            : 
-
-Inputs                   : 
-
-Outputs                  : 
-
-Description              :  
-*********************************************************************************************************/
-
-void Broadcast_Message_To_Neighbours( char *Message, int Message_Type )
+void Node :: Process_Received_Message( Node *origin , int Message_Type, char *Message )
 {
 
 
@@ -134,7 +66,7 @@ Outputs                  :
 Description              :  
 *********************************************************************************************************/
 
-void Broadcast_Message_To_All_Nodes( char *Message, int Message_Type )
+void Node :: Broadcast_Message_To_Neighbours( char *Message, int Message_Type )
 {
 
 
@@ -152,7 +84,7 @@ Outputs                  :
 Description              :  
 *********************************************************************************************************/
 
-void Find_Neighbours( int Node_Id)
+void Node :: Broadcast_Message_To_All_Nodes( char *Message, int Message_Type )
 {
 
 
@@ -170,8 +102,25 @@ Outputs                  :
 Description              :  
 *********************************************************************************************************/
 
+void Node :: Find_Neighbours( int Node_Id)
+{
 
-int IsNeighbour( Node *xyzNode)
+
+
+
+}
+
+/*********************************************************************************************************
+Function Name            : 
+
+Inputs                   : 
+
+Outputs                  : 
+
+Description              :  
+*********************************************************************************************************/
+
+int Node :: IsNeighbour( Node *xyzNode)
 {
 	int error = 0 ;
 

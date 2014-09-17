@@ -1,21 +1,12 @@
-
-#include<iostream>
-#include<cstdlib>
-#include<ctype.h>
-#include<malloc.h>
-#include<fstream>
-#include<string.h>
-#include<math.h>
-#include<cstdlib>
-
 class Node
 {
 
 	public :
 
-		unsigned int time;
 		unsigned int node_id;
-		
+		Node *next;	
+		unsigned int time;
+				
 		struct Connection_Queue
 		{
 			Node *from;
@@ -52,46 +43,3 @@ class Node
 		};
 		
 };
-
-
-class Distributed_System
-{
-
-	public : 
-		
-		int Add_Connection( int Node_Id1, int Node_Id2 );
-	
-		void Remove_Node( int Node_Id );
-
-		int Add_Node( Node *newNode);
-		
-		void Monitor_graph();
-		
-		void List_Nodes();
-
-		int Search_Node_Id( int Node_Id );
-
-		int Get_Transmitted_Num_Message();
-
-		int Get_Num_Inserted_Connection();
-
-
-};
-
-
-
-
-
-
-int 	AddNode( Node *newNode );
-int 	Find_Node( int Node_Id );
-int 	Delete_Node( int Node_Id);
-int 	Update_Graph();
-
-
-int 	ValidateCmdline();
-int 	ValidateFile();
-int 	ValidateInput();
-void	ReadInputs();
-int 	WriteOutput();
-

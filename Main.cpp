@@ -34,10 +34,10 @@ History           :
 #include<string.h>
 #include<sstream>
 
-#include "Graph.h"
+#include "Distributed_System.h"
 using namespace std;
 
-int 	ValidateCmdline(int argc, char *argv[], char **inputfile, char **outputfile);
+int 	ValidateCmdline(int argc, char *argv[], char **inputfile, char **outputfile, char **program);
 int 	Check_Files( char *inputfile, char *outputfile);
 int 	ValidateFile( char * );
 int 	ValidateInput( char *, int );
@@ -49,13 +49,14 @@ int main( int argc, char *argv[] )
 {
 	
 	Distributed_System DS;
-	
-	char *inputfile, *outputfile;
+			
+	char *inputfile, *outputfile, *program;
 
 	inputfile = (char *)" ";
 	outputfile = (char *)" ";
-	
-	if( ValidateCmdline( argc, argv, &inputfile, &outputfile ) == -1)
+	program  =(char *)" ";
+		
+	if( ValidateCmdline( argc, argv, &inputfile, &outputfile, &program) == -1)
 	{
 		cout << "!!...Exiting...!!" << endl;
 		exit(1);	
@@ -73,9 +74,21 @@ int main( int argc, char *argv[] )
 	}
 
 	Extract_EdgeN_Weight( inputfile, outputfile);  //
-	
-	 	
 
+	int Num_Nodes = DS.get_Node_Count(inputfile);
+	
+	
+	Distributed_System *graph = DS.createGraph( Num_Nodes );
+	DS.Add_Connection( graph, 0, 1	);
+	DS.Add_Connection( graph, 2, 3	);
+	DS.Add_Connection( graph, 4, 5	);
+	DS.Add_Connection( graph, 6, 7	);	
+	DS.Add_Connection( graph, 8, 9	);
+	DS.Add_Connection( graph, 0, 2	);
+	DS.Add_Connection( graph, 0, 3	);	
+
+	DS.displayGraph( graph );
+	 
 	ReadInputs();
  	
 		
@@ -99,15 +112,15 @@ Outputs                  : int
 
 Description              :  This function validates the command line arguments
 *******************************************************************************************************/
-int ValidateCmdline( int argc, char *argv[], char **inputfile, char **outputfile)
+int ValidateCmdline( int argc, char *argv[], char **inputfile, char **outputfile, char **program)
 {
 	int 	error=0;
 	string temp, temp1;
 
-	if( argc < 3)
+	if( argc < 4)
 	{
 		cout << " Error : Valid Command for Execution is " << endl;
-		cout << "< exename> <Input_File_Name>.gv <Output_File_Name>.gv " << endl; 		
+		cout << "< exename> <Input_File_Name>.gv <Output_File_Name>.gv <program>.txt " << endl; 		
 		error = -1;
 	}	
 	else
@@ -118,7 +131,7 @@ int ValidateCmdline( int argc, char *argv[], char **inputfile, char **outputfile
 		if( temp1.compare( ".gv" ) != 0 )		
 		{
 			cout << " Error : Valid Command for Execution is " << endl;
-			cout << "< exename> <Input_File_Name>.gv <Output_File_Name>.gv " << endl; 		
+			cout << "< exename> <Input_File_Name>.gv <Output_File_Name>.gv <program>.txt" << endl; 		
 			error = -1;	
 		}
 		else
@@ -129,16 +142,28 @@ int ValidateCmdline( int argc, char *argv[], char **inputfile, char **outputfile
 			if( temp1.compare( ".gv") != 0 )
 			{
 				cout << " Error : Valid Command for Execution is " << endl;
-				cout << "< exename> <Input_File_Name>.gv <Output_File_Name>.gv " << endl; 		
-				error = -1;	
+				cout << "< exename> <Input_File_Name>.gv <Output_File_Name>.gv <program>.txt" << endl; 		
+				error = -1;
 			}
 			else
 			{
-				*inputfile = argv[1];
-				*outputfile = argv[2]; 
+				temp = argv[1];
+				temp1 = temp.substr(( temp.length() - 3 ), 3 );
+
+				if( temp1.compare( ".gv" ) != 0 )		
+				{
+					cout << " Error : Valid Command for Execution is " << endl;
+					cout << "< exename> <Input_File_Name>.gv <Output_File_Name>.gv <program>.txt" << endl; 		
+					error = -1;
+				}
+				else
+				{
+					*inputfile = argv[1];
+					*outputfile = argv[2]; 
+					*program    = argv[3];
+				}
 			}
-		}
-			
+		}		
 	}
 	
 	return error;        
@@ -531,7 +556,7 @@ void Extract_EdgeN_Weight( char *inputfile, char *outputfile )
 	{
 		inpStrm.getline(line, 1023, '\n');
 		str = line;                 
-		cout << str << endl;          
+		       
 		if( str.compare("// edges") == 0 )         // read the input lines till "// edges"
 		{
 			break;

@@ -1,36 +1,9 @@
-#include "project.h"
-
+#include<iostream>
+#include "Node.h"
+#include "Distributed_System.h"
 
 
 Node nd;
-
-/*********
-
-class Distributed_System
-{
-
-	public : 
-		
-		int Add_Connection( int Node_Id1, int Node_Id2 );
-	
-		void Remove_Node( int Node_Id );
-
-		int Add_Node();
-		
-		void Monitor_graph();
-		
-		void List_Nodes();
-
-		int Search_Node_Id( int Node_Id );
-
-		int Get_Transmitted_Num_Message();
-
-		int Get_Num_Inserted_Connection();
-
-
-};
-
-**********/
 
 /*********************************************************************************************************
 Function Name            : 
@@ -42,7 +15,7 @@ Returns                  :
 Description              : 
 *********************************************************************************************************/
 
-int Add_Connection( int Node_Id1, int Node_Id2 )
+int Distributed_System :: Add_Connection( int Node_Id1, int Node_Id2 )
 {
 
 	int error =0 ;
@@ -61,7 +34,7 @@ Returns                  :
 Description              : 
 *********************************************************************************************************/
 	
-void Remove_Node( int Node_Id )
+void Distributed_System :: Remove_Node( int Node_Id )
 {
 
 
@@ -79,7 +52,7 @@ Returns                  :
 Description              : 
 *********************************************************************************************************/
 
-int Add_Node()
+int Distributed_System :: Add_Node( Node *newNode )
 {
 	int error = 0;
 
@@ -97,7 +70,7 @@ Returns                  :
 Description              : 
 *********************************************************************************************************/
 
-void Monitor_graph()
+void Distributed_System :: Monitor_graph()
 {
 
 
@@ -115,7 +88,7 @@ Returns                  :
 Description              : 
 *********************************************************************************************************/		
 	
-void List_Nodes()
+void Distributed_System :: List_Nodes()
 {
 
 
@@ -134,7 +107,7 @@ Returns                  :
 Description              : 
 *********************************************************************************************************/
 
-int Search_Node_Id( int Node_Id )
+int Distributed_System :: Search_Node_Id( int Node_Id )
 {
 
 	int error =0 ;
@@ -153,7 +126,7 @@ Returns                  :
 Description              : 
 *********************************************************************************************************/
 
-int Get_Transmitted_Num_Message()
+int Distributed_System :: Get_Transmitted_Num_Message()
 {
 	int error=0;
 
@@ -172,7 +145,7 @@ Returns                  :
 Description              : 
 *********************************************************************************************************/
 
-int Get_Num_Inserted_Connection()
+int Distributed_System :: Get_Num_Inserted_Connection()
 
 {
 	int error = 0 ;

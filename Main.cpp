@@ -222,7 +222,7 @@ int ValidateFile(char *inpfile)
 		while(inpstrm)		
 		{		
 			std::fill(buff1, buff1 + 1024, ' ');	//Filling entire buffer with blank space
-			inpstrm.getline(buff1,1024, '\n');	// Reading Input file line wise			
+			inpstrm.getline(buff1,1024, '\n');	// Reading Input file line wise		
 			if(inpstrm)
 			{	
 												
@@ -235,6 +235,7 @@ int ValidateFile(char *inpfile)
 						break;
 					}
 				}	 				
+				/*
 				sis << buff1;					
 				while(getline(sis,str,'\n'))
 				{					
@@ -247,6 +248,14 @@ int ValidateFile(char *inpfile)
 					}
 				}
 				sis.clear();
+				*/
+					
+				retval = ValidateInput(buff1, line_num); // Validating items read from Input file 					
+				if(retval == -1)
+				{ 	
+					cout << "Invalid Entry in the input.gv at line num " << line_num << endl;					
+					break;	
+				}				
 			}
 			else
 			{
@@ -339,7 +348,7 @@ int ValidateInput(char *input, int line_num)
 		{			
 			for(iter = 0; iter < strlen(input) - 1 ; iter++)
 			{
-				if(isalnum(input[iter]) == 0)	//Only Alphanumeric characters
+				if(isdigit(input[iter]) == 0)	//Only Numeric characters
 				{
 					cout << "Not a valid node name "<< endl;
 					retval = -1;
@@ -364,7 +373,7 @@ int ValidateInput(char *input, int line_num)
 					//Edge Endpoint1 extracted endl;											
 					for(iter1 = 0; iter1 < strlen(buff) ; iter1++)
 					{
-						if(isalnum(buff[iter1]) == 0) //Only Alphanumeric characters
+						if(isdigit(buff[iter1]) == 0) //Only Numeric characters
 						{
 							cout << "Not a valid edge endpoint "<< endl;							
 							retval = -1;
@@ -405,7 +414,7 @@ int ValidateInput(char *input, int line_num)
 
 					for(iter1 = 0; iter1 < strlen(buff) ; iter1++)
 					{
-						if(isalnum(buff[iter1]) == 0) //Only Alphanuemeric
+						if(isdigit(buff[iter1]) == 0) //Only Nuemeric
 						{
 							cout << "Not a valid edge endpoint"<< endl;
 							retval = -1;

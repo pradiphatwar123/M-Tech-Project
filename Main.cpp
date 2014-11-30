@@ -8,20 +8,20 @@ Description       :
 
 Programmers       :  (1) Sachin Balchim    (CS13M010)
                      (2) Bibekananda Raul  (CS13M011)
-		     (3) Pradip Hatwar     (CS13M022)
+					 (3) Pradip Hatwar     (CS13M022)
 
 Compiler name     :  
 
 Date created      :  
 
 List of functions : (1)  int 	main(int argc, char *argv[])
-		    (2)  int	ValidateCmdline();
-		    (3)  int	Check_Files();
-		    (3)	 int	ValidateFile();	
-		    (4)  int 	ValidateInput();
-		    (5)  void	ReadInputs();	
-		    (6)  int	WriteOutput();	
-		    (7)  void Extract_EdgeN_Weights( char *, char *);  \\                   
+				(2)  int	ValidateCmdline();
+				(3)  int	Check_Files();
+				(3)	 int	ValidateFile();	
+				(4)  int 	ValidateInput();
+				(5)  void	ReadInputs();	
+				(6)  int	WriteOutput();	
+				(7)  void Extract_EdgeN_Weights( char *, char *);  \\                   
 History           :  
 
 *********************************************************************************************************/
@@ -33,7 +33,7 @@ History           :
 #include<fstream>
 #include<string.h>
 #include<sstream>
-
+#include<vector>
 #include "Distributed_System.h"
 using namespace std;
 
@@ -41,8 +41,7 @@ int 	ValidateCmdline(int argc, char *argv[], char **inputfile, char **outputfile
 int 	Check_Files( char *inputfile, char *outputfile);
 int 	ValidateFile( char * );
 int 	ValidateInput( char *, int );
-void	ReadInputs();
-int 	WriteOutput();
+
 void Extract_EdgeN_Weight( char *, char *);  //
 
 int main( int argc, char *argv[] )
@@ -56,6 +55,7 @@ int main( int argc, char *argv[] )
 	outputfile = (char *)" ";
 	program  =(char *)" ";
 		
+	// validates the command line arguments
 	if( ValidateCmdline( argc, argv, &inputfile, &outputfile, &program) == -1)
 	{
 		cout << "!!...Exiting...!!" << endl;
@@ -67,32 +67,100 @@ int main( int argc, char *argv[] )
 		cout << " !!...Exiting...!! " << endl;
 		exit(1);
 	}
-	else if(ValidateFile(inputfile) == -1) // Validating Input File 
+	
+	// Validating Input File 
+	else if(ValidateFile(inputfile) == -1) 
 	{
 		cout << "Failed to validate file  " << inputfile  << ", Exiting....." << endl;
 		exit(-1);
 	}
 
-	Extract_EdgeN_Weight( inputfile, outputfile);  //
+	// Extracting node Id's of the edges and corresponding weights from the Input_File.gv
+	Extract_EdgeN_Weight( inputfile, outputfile);  
 
-	int Num_Nodes = DS.get_Node_Count(inputfile);
+	ifstream ip;
+	ip.open(inputfile);
+	string str;
+	getline(ip,str);
+	vector<int> nodeID_list;
 	
+	// find(" ") return -1 if element not found 
+	while(str.find("edges")== -1)
+	{
+		if(str.find(";") != -1)
+		{
+			char s[100];
+			int i;
+			
+			for(i = 0; i < str.length(); i++)
+			{	
+				s[i]=str[i];
+			}
+			s[i] = '\0';
+			int temp=atoi(s);
+			nodeID_list.push_back(temp);
+		}
+		getline(ip,str);
+	}
 	
-	Distributed_System *graph = DS.createGraph( Num_Nodes );
-	DS.Add_Connection( graph, 0, 1	);
-	DS.Add_Connection( graph, 2, 3	);
-	DS.Add_Connection( graph, 4, 5	);
-	DS.Add_Connection( graph, 6, 7	);	
-	DS.Add_Connection( graph, 8, 9	);
-	DS.Add_Connection( graph, 0, 2	);
-	DS.Add_Connection( graph, 0, 3	);	
-
-	DS.displayGraph( graph );
-	 
-	ReadInputs();
- 	
+	DS.Create_graph( nodeID_list.size(), nodeID_list );
+	
+	ip.close();
+	
+	ip.open("Extracted_EdgeN_Weight");
+	
+	while(ip)
+	{
+		int from=0, to=0, weight;
+		ip>>from>>to>>weight;
+		if(from != 0 || to != 0) DS.addEdge(from,to,weight);
 		
-	WriteOutput();
+	}
+	
+	int choice;
+	while(1)
+	{
+		cout << "1. Send Message" << endl;
+		cout << "2. Display Adjacency List of Graph " << endl;
+		cout << "3. Exit " << endl;
+		cout << " Enter your choice " << endl;
+		cin>> choice;
+		
+		switch( choice )
+		{
+			case 1:
+				{
+					cout<<"enter msg\n";
+					int from, to;
+					string msg;
+					cin>>from>>to;
+					getline(cin, msg);
+					DS.Send_message(from,to,msg);
+					DS.Display_msg(to);
+					break;
+				}
+				
+			case 2:
+				{
+						DS.Display();
+						break;
+				}
+			case 3:
+				{
+					exit(0);
+					break;
+				}
+				
+			default : 
+				{
+					cout << "Wrong Choice" << endl;
+					break;
+				}
+		}
+	}
+
+	 
+	
 	
 	return 0;
 }
@@ -103,12 +171,12 @@ int main( int argc, char *argv[] )
 Function Name            : ValidateCmdline
 
 Inputs                   : (1) Number of command line arguments passed
-			   (2) List of Command Line arguments
-			   (3) Reference to input file
-			   (4) Reference to output file
+							(2) List of Command Line arguments
+							(3) Reference to input file
+							(4) Reference to output file
 Outputs                  : int
-			    0 	If No Error
-			   -1 	If Error
+							0 	If No Error
+							-1 	If Error
 
 Description              :  This function validates the command line arguments
 *******************************************************************************************************/
@@ -170,13 +238,12 @@ int ValidateCmdline( int argc, char *argv[], char **inputfile, char **outputfile
 }
 
 /*********************************************************************************************************
-Function Name            : Check_Files
-
-Inputs                   : 
-
-Outputs                  : 
-
-Description              :  
+Function Name            : check_files 
+Inputs                   : (1) Reference to input file
+			   (2) Reference to output file			   
+Outputs                  : -1 In case of error 
+                            0 In case of sucess
+Description              : This function verifies the existence of input file, and creates output file if it does not exist
 *******************************************************************************************************/	
 
 int Check_Files( char *inputfile, char *outputfile )
@@ -217,13 +284,12 @@ int Check_Files( char *inputfile, char *outputfile )
 }
 
 /*********************************************************************************************************
-Function Name            : 
+Function Name            : ValidateFile
+Inputs                   : (1) Reference to file to be validated					
 
-Inputs                   : 
-
-Outputs                  : 
-
-Description              :  
+Outputs                  : -1 In case of any error occurrs
+                            0 In case of all items in the file are proper
+Description              :  This function validates the file consisting of a graph nodes, edges information
 *******************************************************************************************************/	
 
 int ValidateFile(char *inpfile)
@@ -235,8 +301,9 @@ int ValidateFile(char *inpfile)
 	stringstream 	sis;	
 	string		str;
 
-
-	inpstrm.open(inpfile, ios::in);	// Opening Input file 
+	// Opening Input file
+	
+	inpstrm.open(inpfile, ios::in);	 
 
 	if(!inpstrm){		
 		cout << "Exiting...." << endl;
@@ -246,12 +313,15 @@ int ValidateFile(char *inpfile)
 	{			
 		while(inpstrm)		
 		{		
-			std::fill(buff1, buff1 + 1024, ' ');	//Filling entire buffer with blank space
-			inpstrm.getline(buff1,1024, '\n');	// Reading Input file line wise		
+			//Filling entire buffer with blank space
+			std::fill(buff1, buff1 + 1024, ' ');	
+			
+			// Reading Input file line wise
+			inpstrm.getline(buff1,1024, '\n');			
 			if(inpstrm)
 			{	
-												
-				if((int)buff1[0] == 0) //For handling blank lines
+				//For handling blank lines								
+				if((int)buff1[0] == 0) 
 				{					
 					retval = ValidateInput(buff1, line_num);
 					if(retval == -1)
@@ -260,22 +330,9 @@ int ValidateFile(char *inpfile)
 						break;
 					}
 				}	 				
-				/*
-				sis << buff1;					
-				while(getline(sis,str,'\n'))
-				{					
-					strncpy(buff, str.c_str(), sizeof(buff));
-					retval = ValidateInput(buff, line_num); // Validating items read from Input file 					
-					if(retval == -1)
-					{ 	
-						cout << "Invalid Entry in the input.gv at line num " << line_num << endl;					
-						break;	
-					}
-				}
-				sis.clear();
-				*/
-					
-				retval = ValidateInput(buff1, line_num); // Validating items read from Input file 					
+				
+				// Validating items read from Input file
+				retval = ValidateInput(buff1, line_num);  					
 				if(retval == -1)
 				{ 	
 					cout << "Invalid Entry in the input.gv at line num " << line_num << endl;					
@@ -304,13 +361,13 @@ int ValidateFile(char *inpfile)
 }
 
 /*********************************************************************************************************
-Function Name            : 
-
-Inputs                   : 
-
-Outputs                  : 
-
-Description              :  
+Function Name            : ValidateInput 
+Inputs                   : (1) Reference to input item	
+			   (2) Line NUmber
+							
+Outputs                  : -1 In case of any error occurrs
+                            0 In case of valid item
+Description              :  This function validates the token read by ValidateFile to be a valid Graph information
 *******************************************************************************************************/
 
 int ValidateInput(char *input, int line_num)
@@ -583,42 +640,4 @@ void Extract_EdgeN_Weight( char *inputfile, char *outputfile )
 		outStrm << "\n";
 	}
 	
-}
-
-
-/*********************************************************************************************************
-Function Name            : 
-
-Inputs                   : 
-
-Outputs                  : 
-
-Description              :  
-*******************************************************************************************************/
-
-void ReadInputs()
-{
-
-
-	
-
-}
-
-/*********************************************************************************************************
-Function Name            : WriteOutput
-
-Inputs                   : 
-
-Outputs                  : 
-
-Description              :  
-*********************************************************************************************************/
-
-int WriteOutput()
-{
-	int error =0 ;
-
-	
-	return error;
-
 }

@@ -1,340 +1,151 @@
 #include<iostream>
-#include<stdlib.h>
-#include<fstream>
-
+#include<cstdlib>
+#include<string>
+#include<vector>
 #include "Distributed_System.h"
-
 using namespace std;
 
-Node nd;
-
-
 /*********************************************************************************************************
-Function Name            : 
+Function Name            : Create_graph
 
 Inputs                   : 
 
 Outputs                  : 
 
 Description              :  
-*******************************************************************************************************/	
-Distributed_System * Distributed_System :: createGraph( int num_Nodes)
+*********************************************************************************************************/
+
+void Distributed_System::Create_graph(int n, vector<int> A)
 {
-	
-	Distributed_System *graph = new Distributed_System;   // graph is objct of Distributed_System
-	
-	graph->array = new Node_Adj_List [ num_Nodes ];   // allocate memory for Head Nodes Of Adjecency List
-	graph->NUM_NODES = num_Nodes;			  
-	
-	for( int i = 0; i < graph->NUM_NODES; i++ )
+	Array = new Node[n];
+	size=n;
+	for(int i = 0; i < n; i++)
 	{
-		graph->array[i].Head = NULL;		// Initially setting all Head NOde pointer to NULL
+		Array[i].Node_ID = A[i];
+		Array[i].head = NULL;
 	}
-	
-	return graph;
 }
 
 /*********************************************************************************************************
-Function Name            : 
+Function Name            : addEdge
 
-Inputs                   : 
+Inputs                   : source Node_ID, destination Node_ID, Edge weight
 
 Outputs                  : 
 
-Description              :  
-*******************************************************************************************************/	
-
-Node * Distributed_System :: Add_Node( int Node_Id )
-{
-	Node *newNode = new Node;
-	
-	newNode->node_id = Node_Id;
-	newNode->next	= NULL;
-	
-	return newNode;
-}
-		
-
-
-/*********************************************************************************************************
-Function Name            : 
- 
-Inputs                   : 
-
-Returns                  : 
-
-Description              : 
+Description              :
 *********************************************************************************************************/
-void Distributed_System :: Add_Connection( Distributed_System *graph, int source, int destination )    // Adding Edges
+
+void Distributed_System::addEdge(int from, int to, int weight)
 {
-
-	Node *newNode = Add_Node( source );
+	int f = find_node(from), t = find_node(to);
+	AdjListNode *p=new AdjListNode, *q=new AdjListNode;
 	
-	newNode->next = graph->array[destination].Head;
-	graph->array[destination].Head = newNode;
-
-	newNode = Add_Node( destination );
-	newNode->next = graph->array[source].Head;
-	graph->array[source].Head = newNode;	
-
+	p->dest = t;
+	p->weight = weight;
+	p->next = Array[f].head;
+	Array[f].head = p;
+	
+	q->dest = f;
+	q->weight = weight;
+	q->next = Array[t].head;
+	Array[t].head = q;
 }
 
 /*********************************************************************************************************
-Function Name            : 
+Function Name            : Send_message
 
-Inputs                   : 
+Inputs                   : souce Node_ID, Dest Node_ID, Message 
+
+Outputs                  : -1 If Error
+							1 If successful send_message
+Description              :  Sending a message from source node to destination node 
+*********************************************************************************************************/
+
+int Distributed_System::Send_message(int from, int to, string msg)
+{
+	int f = find_node(from), t = find_node(to);
+	
+	if(f==-1 || t==-1) 
+		return  -1;
+	Array[t].message.push_back(msg);
+	Array[t].node_number.push_back(f);
+	return 1;
+}
+
+/*********************************************************************************************************
+Function Name            : find_node
+
+Inputs                   : Node_ID
 
 Outputs                  : 
 
-Description              :  
-*******************************************************************************************************/
-
-
-void Distributed_System :: Remove_Node( int Node_Id )
-{
-
-
-
-
-}
-
-/*********************************************************************************************************
-Function Name            : 
- 
-Inputs                   : 
-
-Returns                  : 
-
-Description              : 
-*********************************************************************************************************/	
-
-int Distributed_System :: Update_Graph()
-{
-
-	int error = 0 ;
-
-	return error;
-
-}
-
-/*********************************************************************************************************
-Function Name            : 
- 
-Inputs                   : 
-
-Returns                  : 
-
-Description              : 
+Description              :  Checking whether node is present in the network or not
 *********************************************************************************************************/
 
-void Distributed_System :: displayGraph( Distributed_System *graph)
+int Distributed_System::find_node(int Node_ID)
 {
-	
-	
-	ofstream outStrm;
-		
-	// cout << "Adjecency List Representation Of Distributed System ( Graph ) " << endl;
-	
-	outStrm.open("graph_In_Adj_List_Format.txt", ios::out );
-	
-	for( int i = 0; i < graph->NUM_NODES; i++ )
+	for( int i = 0; i < size; i++)
 	{
-		Node *current = graph->array[i].Head; 
-	
-		if( i == 0 )
-		{
-			outStrm <<" <Source Node> ----> <Adjacency List Nodes> " << endl;
-		}
-		outStrm << i << "    " ;
-		
-		while( current )
-		{
-			outStrm <<  current->node_id << "    ";
-			current = current->next;
-		}			
-	
-		outStrm << "\n";
-
-
-	/*	cout << "Adj_List [" << i << "] == > ";
-		
-		while( current )
-		{
-			cout <<  current->node_id << "->";
-			current = current->next;
-		}			
-	
-		cout << "\n";
-
-	*/
-
-
-
+		if( Array[i].Node_ID == Node_ID ) return i;
 	}
-	
-	outStrm.close();	
-
-
-
-
-
-}
- 
-/*********************************************************************************************************
-Function Name            : 
- 
-Inputs                   : 
-
-Returns                  : 
-
-Description              : 
-*********************************************************************************************************/
-
-int Distributed_System :: Find_Node( int Node_Id )
-{
-	int error = 0 ;
-
-
-	return error;
+	return -1;
 }
 
-
-
-
 /*********************************************************************************************************
-Function Name            : 
- 
+Function Name            : Display
+
 Inputs                   : 
 
-Returns                  : 
+Outputs                  : 
 
-Description              : 
+Description              : Ajacency list of nodes 
 *********************************************************************************************************/
 
-int Distributed_System :: get_Node_Count( char *inputfile)
+void Distributed_System::Display()
 {
-	int error = 0, N =1024 ;
-	int Node_Count = 0;
-	char line[N];
-	
-	ifstream inpStrm;
-	inpStrm.open( inputfile , ios::in );  
-	
-	while( inpStrm )
+	for(int i=0; i<size; i++)
 	{
-		string str;
-		
-		inpStrm.getline( line, 1023, '\n');
-		str = line;
-		
-		if( str.compare("// edges") == 0 )
+		cout<<Array[i].Node_ID;
+		AdjListNode *p = Array[i].head;
+		while(p != NULL)
 		{
-			return Node_Count-2;
+			cout<<" -> "<<Array[p->dest].Node_ID;
+			p = p->next;
 		}
-	
-		Node_Count++;
-	}	
-	inpStrm.close();	
-
-	return error;
+		cout<<endl;
+	}
 }
 
-
-
-
-
-
 /*********************************************************************************************************
-Function Name            : 
- 
-Inputs                   : 
+Function Name            : Display_msg
 
-Returns                  : 
+Inputs                   : Node_ID
 
-Description              : 
+Outputs                  : 
+								
+Description              :  Displaying messages of Node_ID
 *********************************************************************************************************/
 
-void Distributed_System :: Monitor_graph()
+void Distributed_System::Display_msg(int ID)
 {
-
-
-
-
-}
-
-/*********************************************************************************************************
-Function Name            : 
- 
-Inputs                   : 
-
-Returns                  : 
-
-Description              : 
-*********************************************************************************************************/		
-	
-void Distributed_System :: List_Nodes()
-{
-
-
-
-
-
-}
-
-/*********************************************************************************************************
-Function Name            : 
- 
-Inputs                   : 
-
-Returns                  : 
-
-Description              : 
-*********************************************************************************************************/
-
-int Distributed_System :: Search_Node_Id( int Node_Id )
-{
-
-	int error =0 ;
-
-	
-	return error;
-}
-
-/*********************************************************************************************************
-Function Name            : 
- 
-Inputs                   : 
-
-Returns                  : 
-
-Description              : 
-*********************************************************************************************************/
-
-int Distributed_System :: Get_Transmitted_Num_Message()
-{
-	int error=0;
-
-
-
-	return error;
-}
-
-/*********************************************************************************************************
-Function Name            : 
- 
-Inputs                   : 
-
-Returns                  : 
-
-Description              : 
-*********************************************************************************************************/
-
-int Distributed_System :: Get_Num_Inserted_Connection()
-
-{
-	int error = 0 ;
-
-
-	
-	return error;
+	int n = find_node(ID);
+	if(n == -1) 
+	{
+		cout<<"Error.....Node does not EXIST!!!!\n";
+	}
+	else if(Array[n].message.size() == 0)
+	{
+		cout<<"No message\n";
+	}
+	else
+	{
+		cout<<Array[n].Node_ID<<endl;
+		for(int i = 0; i < Array[n].message.size(); i++)
+		{
+			
+			cout<<"\t"<<Array[Array[n].node_number[i]].Node_ID<<":\t";
+			cout<<Array[n].message[i]<<endl;
+		}
+	}
 }

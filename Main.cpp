@@ -123,6 +123,9 @@ int main( int argc, char *argv[] )
 		cout << "1. Send Message" << endl;
 		cout << "2. Display Adjacency List of Graph " << endl;
 		cout << "3. Exit " << endl;
+		cout << "4. Display Messages " << endl;
+		cout << "5. Broadcast A Message " << endl;
+		cout << "6. Display Messages of ALL NODES " << endl;
 		cout << " Enter your choice " << endl;
 		cin>> choice;
 		
@@ -130,12 +133,17 @@ int main( int argc, char *argv[] )
 		{
 			case 1:
 				{
-					cout<<"enter msg\n";
+					cout<<"enter msg( FROM, TO, MESSAGE_TYPE, MESSAGE )";
 					int from, to;
-					string msg;
-					cin>>from>>to;
+					string msg, msg_type;
+					cin>>from>>to>>msg_type;
 					getline(cin, msg);
-					DS.Send_message(from,to,msg);
+
+					if ( DS.Send_message(from,to,msg_type, msg) == -1 )
+					{	
+						break;
+					}
+					
 					DS.Display_msg(to);
 					break;
 				}
@@ -150,7 +158,32 @@ int main( int argc, char *argv[] )
 					exit(0);
 					break;
 				}
-				
+			case 4:
+			{
+					int ID;
+					cout << "\n enter node ID";
+					cin>>ID;
+					DS.Display_msg(ID);
+					break;
+			}
+			case 5 : 
+				{
+					int ID;
+					string msg_type, msg;
+					cout << " Enter [ Node Id, Message Type, Message ] ";
+					cin>>ID>>msg_type;
+					getline(cin, msg);
+					DS.Broadcast_msg( ID, msg_type, msg);
+					break;
+				}
+			case 6:
+				{
+						for( int i = 0; i < DS.size; i++)
+						{
+							DS.Display_msg(DS.Array[i].Node_ID);
+						}
+						break;
+				}
 			default : 
 				{
 					cout << "Wrong Choice" << endl;

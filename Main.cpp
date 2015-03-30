@@ -124,8 +124,9 @@ int main( int argc, char *argv[] )
 		cout << "2. Display Adjacency List of Graph " << endl;
 		cout << "3. Exit " << endl;
 		cout << "4. Display Messages " << endl;
-		cout << "5. Broadcast A Message " << endl;
+		//cout << "5. Broadcast A Message " << endl;
 		cout << "6. Display Messages of ALL NODES " << endl;
+		cout << "7. START SIMULATION " << endl;
 		cout << " Enter your choice " << endl;
 		cin>> choice;
 		
@@ -133,17 +134,15 @@ int main( int argc, char *argv[] )
 		{
 			case 1:
 				{
-					cout<<"enter msg( FROM, TO, MESSAGE_TYPE, MESSAGE )";
-					int from, to;
+					cout<<"enter msg( FROM, TO, MESSAGE_TYPE, Message_Id, MESSAGE )";
+					int from, to, Message_Id;
+					//bool Message_Read = false;   // once message reach to a node, change Message_Read = true 
+												 //	i.e. message received, process a message( compute ) and send
 					string msg, msg_type;
-					cin>>from>>to>>msg_type;
+					cin>>from>>to>>msg_type>>Message_Id;
 					getline(cin, msg);
 
-					if ( DS.Send_message(from,to,msg_type, msg) == -1 )
-					{	
-						break;
-					}
-					
+					DS.Send_message(from,to,msg_type,Message_Id, msg);
 					DS.Display_msg(to);
 					break;
 				}
@@ -166,7 +165,7 @@ int main( int argc, char *argv[] )
 					DS.Display_msg(ID);
 					break;
 			}
-			case 5 : 
+		/*	case 5 : 
 				{
 					int ID;
 					string msg_type, msg;
@@ -176,12 +175,22 @@ int main( int argc, char *argv[] )
 					DS.Broadcast_msg( ID, msg_type, msg);
 					break;
 				}
+		*/		
 			case 6:
 				{
 						for( int i = 0; i < DS.size; i++)
 						{
-							DS.Display_msg(DS.Array[i].Node_ID);
+							DS.Display_msg(i);
 						}
+						break;
+				}
+			case 7: 
+				{
+						int Round;
+						
+						cout << " For How Many Rounds Do You Want To Simulate " << endl;
+						cin>> Round;
+						DS.Simulation(Round);
 						break;
 				}
 			default : 

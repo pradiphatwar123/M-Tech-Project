@@ -1,5 +1,6 @@
 #include<iostream>
 #include<cstdlib>
+#include<algorithm>
 #include<string>
 #include<vector>
 #include<queue>
@@ -9,7 +10,7 @@ using namespace std;
 /*********************************************************************************************************
 Function Name            : Create_graph
 
-Inputs                   : 
+Inputs                   : n = Number of Nodes
 
 Outputs                  : 
 
@@ -23,8 +24,6 @@ void Distributed_System::Create_graph(int n, vector<int> A)
 	for(int i = 0; i < n; i++)
 	{
 		Array[i].Node_ID = A[i];
-		Array[i].Broadcast_Msg =  false;
-		Array[i].Broadcast_Msg_Received = false;
 		Array[i].head = NULL;
 	}
 }
@@ -65,23 +64,19 @@ Outputs                  : -1 If Error
 Description              :  Sending a message from source node to destination node 
 *********************************************************************************************************/
 
-int Distributed_System::Send_message(int from, int to,std::string msg_type, std::string msg)
+void Distributed_System::Send_message(int from, int to,std::string msg_type, int Message_Id, std::string msg) // 'from' & 'to' index of node
 {
-	int f = find_node(from), t = find_node(to);
+	AdjListNode *p = Array[to].head;
 	
-	if(f==-1 || t==-1) 
-	{	
-		cout << " Error : Either Source Node OR Destination Node NOT FOUND " << endl;
-		return  -1;
-	
-	}
-	if( Receive_message( f, t, msg_type, msg) == -1)
+	vector<int>::iterator it ;
+	it = find( Array[to].msg.Message_Id.begin(), Array[to].msg.Message_Id.end(), Message_Id );
+	if( it == Array[to].msg.Message_Id.end() )
 	{
-		cout << " Error : in Message Type" << endl;
-		return -1;
+		Array[to].msg.node_number.push_back( from );
+		Array[to].msg.msg_type.push_back( msg_type );
+		Array[to].msg.Message_Id.push_back( Message_Id );
+		Array[to].msg.message.push_back( msg );
 	}
-			
-	return 1;
 }
 
 /*********************************************************************************************************
@@ -93,39 +88,89 @@ Outputs                  :
 
 Description              :  
 *********************************************************************************************************/
-int Distributed_System::Receive_message(int f, int t, std::string msg_type, std::string msg)  // f = index of "from" Node  t = index of "to" Node
+void Distributed_System::Receive_message(int k )  // k = index of Node in adjacency list e.g. Array[k]
 {
-	
-	if( msg_type == "Broadcast_Message")
+	// check message vector is empty or not
+	if( Array[k].msg.message.size()  == 0 )	
 	{
-		Array[t].bm.message.push_back(msg);
-		//cout<< Array[t].bm.message.front() << endl;
-		//cout<< t;
-		Array[t].bm.node_number.push_back(f);
-		//cout<< " hello";
+			// Do Nothing
 	}
-	else if( msg_type == "Temperature_Read")
+	else  
 	{
-		Array[t].tr.message.push_back(msg);
-		Array[t].tr.node_number.push_back(f);
-	}
-	else if( msg_type == "Node_Id")
-	{
-		Array[t].nid.message.push_back(msg);
-		Array[t].nid.node_number.push_back(f);
-	}
-	else if( msg_type == "Node_Count")
-	{
-		Array[t].nc.message.push_back(msg);
-		Array[t].nc.node_number.push_back(f);
-	}
-	else
-	{
-		cout<< "INVALID MESSAGE TYPE" << endl;
-		return -1;
-	}
+		for( int i = 0; i < Array[k].msg.message.size(); i++)
+		{
+			// computation as per msg_type
+			if( Array[k].msg.msg_type[i].compare("Broadcast_Message") == 0)
+			{
+				// put a message in OUTBOX in order to broadcast to it's neighbours
+				AdjListNode *p = Array[k].head;
+				
+				while( p  != NULL )
+				{
+					// do not push back a same message to an incoming edge ( node from where message had come)
+					if( Array[k].msg.node_number[i] != p->dest )	
+					{
+						//vector<int>::iterator it;
+						// it = find( Array[k].Outb.Message_Id.begin(),Array[k].Outb.Message_Id.end(),Array[k].msg.Message_Id[i]);
 
-	return 1;
+						 // if( it == Array[k].Outb.Message_Id.end())  // If element not present in Outbox
+						{
+							
+							Array[k].Outb.Message_Id.push_back( Array[k].msg.Message_Id[i]);
+							Array[k].Outb.msg_type.push_back( Array[k].msg.msg_type[i]);
+							Array[k].Outb.node_number.push_back( p->dest);				// Array[k] want to send message to Array[p->dest]
+							Array[k].Outb.message.push_back( Array[k].msg.message[i]);
+							
+						}
+						
+					}
+					p = p->next;
+				}
+
+				//**************************** Different ways of deleting element from Vector**************************************
+
+				
+				//Array[k].msg.Message_Id.erase(std::remove(Array[k].msg.Message_Id.begin(), Array[k].msg.Message_Id.end(), Array[k].msg.Message_Id[i]), Array[k].msg.Message_Id.end());
+				//Array[k].msg.msg_type.erase(std::remove(Array[k].msg.msg_type.begin(), Array[k].msg.msg_type.end(), Array[k].msg.msg_type[i]), Array[k].msg.msg_type.end());
+				//Array[k].msg.node_number.erase(std::remove(Array[k].msg.node_number.begin(), Array[k].msg.node_number.end(), Array[k].msg.node_number[i]), Array[k].msg.node_number.end());
+				//Array[k].msg.message.erase(std::remove(Array[k].msg.message.begin(), Array[k].msg.message.end(), Array[k].msg.message[i]), Array[k].msg.message.end());
+				//vec.erase(std::remove(vec.begin(), vec.end(), int_to_remove), vec.end());
+				
+				//Array[k].msg.Message_Id.erase(Array[k].msg.Message_Id.begin() + 0);
+				//Array[k].msg.Message_Id.erase(Array[k].msg.msg_type.begin() + 0);
+				//Array[k].msg.Message_Id.erase(Array[k].msg.node_number.begin() + 0);
+				//Array[k].msg.Message_Id.erase(Array[k].msg.message.begin() + 0);
+				
+				//Array[k].msg.Message_Id.clear();
+				//Array[k].msg.msg_type.clear();
+				//Array[k].msg.node_number.clear();
+				//Array[k].msg.message.clear();
+
+			}
+			else if( Array[k].msg.msg_type[i].compare("Temperature_Read") == 0)
+			{
+
+			
+			}
+			else if( Array[k].msg.msg_type[i].compare("Node_Id") == 0)
+			{
+
+			
+			}
+			else if( Array[k].msg.msg_type[i].compare("Node_Count") == 0)
+			{
+
+			
+			}
+			else
+			{
+				cout<< "INVALID MESSAGE TYPE" << endl;
+			}
+					// Deleting a message information from Inbox i.e.  message  vector, after pushing a message information in outbox
+		}
+		
+	}
+	
 }
 /*********************************************************************************************************
 Function Name            : Display_msg
@@ -137,6 +182,7 @@ Outputs                  :
 Description              :  Displaying messages of Node_ID
 *********************************************************************************************************/
 
+/*
 int Distributed_System::Broadcast_msg( int from, std::string msg_type, std::string msg)
 {
 	int f = find_node( from );
@@ -198,6 +244,7 @@ int Distributed_System::Broadcast_msg( int from, std::string msg_type, std::stri
 	
 	return 1;
 }
+*/
 
 /*********************************************************************************************************
 Function Name            : find_node
@@ -256,73 +303,114 @@ Outputs                  :
 Description              :  Displaying messages of Node_ID
 *********************************************************************************************************/
 
-void Distributed_System::Display_msg(int ID)
+void Distributed_System::Display_msg(int k)   // k is a index of node Array[k]
 {
-	int n = find_node(ID);
-	
-	if(n == -1) 
+	for( int i = 0; i < Array[k].msg.message.size(); i++)
 	{
-		cout<<"Error.....Node does not EXIST!!!!\n";
+	 cout << "  " << Array[k].Node_ID << "\t \t" << Array[k].msg.Message_Id[i] << " \t       " << Array[k].msg.msg_type[i] << "  \t" << Array[Array[k].msg.node_number[i]].Node_ID << " \t \t" << Array[k].msg.message[i] << endl;
+		cout << endl;
 	}
-	else if(Array[n].bm.message.size() == 0  && Array[n].nid.message.size() == 0 && Array[n].tr.message.size() == 0 && Array[n].nc.message.size() == 0)
+}
+
+/*********************************************************************************************************
+Function Name            : Simulation
+
+Inputs                   : int Round
+
+Outputs                  : 
+								
+Description              :  
+*********************************************************************************************************/
+
+void Distributed_System::Simulation( int R)
+{
+	// simulate for 'R' number of rounds
+	for( int i = 0; i < R; i++ )         
 	{
-		cout<<"********* NO MESSAGE *********** " << endl;
-	}
-	else
-	{
-		cout<< " Node ID        :" << Array[n].Node_ID<<endl;
+
+		// Receive message & process it 
+		// k is the index of a Node in the Array e.g. Array[k]
 		
-		if( Array[n].bm.message.size() > 0)
+		cout << " ROUND " << i << endl << endl;
+		cout << "My ID   :     MESSAGE ID   :   MESSAGE TYPE  :     RECEIVED FROM    :   MESSAGE " << endl << endl; 
+		
+		// check message vector of node Array[k] and perform action as per 'msg_type'
+		for( int k = 0; k < size; k++ )          
 		{
-			cout << " Message Type   : Broadcast_Message "<<endl;
-			cout << " Received From  : Message" << endl;
-			for(int i = 0; i < Array[n].bm.message.size(); i++)
-			{
-				cout<<"\t"<<Array[Array[n].bm.node_number[i]].Node_ID<<"\t:";
-				cout<<Array[n].bm.message[i]<<endl;
-			}
-			cout << endl;
+			Display_msg(k);
+			Receive_message( k );			
 		}
+
+		// send Messages
+		for( int k = 0; k < size; k++ )			 
+		{
+			for( int p = 0; p < Array[k].Outb.message.size(); p++)
+			{
+				Send_message( k, Array[k].Outb.node_number[p], Array[k].Outb.msg_type[p], Array[k].Outb.Message_Id[p], Array[k].Outb.message[p]);
+			}
+			Array[k].Outb.Message_Id.clear();
+			Array[k].Outb.msg_type.clear();
+			Array[k].Outb.node_number.clear();
+			Array[k].Outb.message.clear();
+		}
+				
+		// Initiate activity like broadcast, convergecast
+
+		for( int k = 0; k < size; k++ )          
+		{
+			char choice;
+			cout << " Would You Like To Initiate Something (y/n) " << endl;
+			cin>>choice;
 			
-		if( Array[n].tr.message.size() > 0)
-		{
-		
-			cout << " Message Type   : Temperature_Read "<<endl;
-			cout << " Received From  : Message" << endl;
-					
-			for(int i = 0; i < Array[n].tr.message.size(); i++)
-			{
-				cout<<"\t"<<Array[Array[n].tr.node_number[i]].Node_ID<<"\t:";
-				cout<<Array[n].tr.message[i]<<endl;
-			}
-			cout << endl;
-		}
-		
-		if( Array[n].nid.message.size() > 0)
-		{
-			cout << " Message Type   : Node_Id "<<endl;
-			cout << " Received From  : Message" << endl;
-	
-			for(int i = 0; i < Array[n].nid.message.size(); i++)
-			{
-				cout<<"\t"<<Array[Array[n].nid.node_number[i]].Node_ID<<"\t:";
-				cout<<Array[n].nid.message[i]<<endl;
-			}
-			cout << endl;
-		}
-		
-		if( Array[n].nc.message.size() > 0)
-		{
-			cout << " Message Type   : Node_Count "<<endl;
-			cout << " Received From  : Message" << endl;
+			cout << endl << endl;
 			
-			for(int i = 0; i < Array[n].nc.message.size(); i++)
+			if( 'y' == choice )
 			{
-				cout<<"\t"<<Array[Array[n].nc.node_number[i]].Node_ID<<"\t:";
-				cout<<Array[n].nc.message[i]<<endl;
+				int choice;
+							
+				cout << "************  CHOICES  ************" << endl;
+				cout << "1. Broadcast " << endl;
+				cout << "2. Convergecast " << endl << endl;
+				cout << "Enter Your choice " << endl;
+				cin>>choice;
+							
+				switch( choice )
+				{
+					case 1:
+						{
+							// Initiating Broadcast
+							int Message_Id;
+							string msg, msg_type;
+										
+							cout<< "enter msg( MESSAGE_TYPE( Broadcast_Message), Message_Id, MESSAGE )" << endl;
+							cin>>msg_type>>Message_Id;
+							getline(cin, msg);
+							
+							cout << endl;
+							AdjListNode *p = Array[k].head;
+							
+							while( p  != NULL)
+							{
+								Send_message( k, p->dest, msg_type, Message_Id, msg );	// send index of source and destination node
+								p = p->next;
+							}
+							
+							break;
+						}
+					case 2:
+						{
+							// call convergecast
+							break;
+						}			
+					default: 
+						{
+							cout << "**** WRONG CHOICE ****" << endl;
+							break;
+						}
+				}
+		
 			}
 		}
+
 	}
-	
-	cout<< endl <<endl;
 }

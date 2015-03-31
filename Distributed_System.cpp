@@ -1,9 +1,13 @@
 #include<iostream>
+//#include<bits/stdc++.h>
 #include<cstdlib>
 #include<algorithm>
 #include<string>
 #include<vector>
 #include<queue>
+//#include<random>    // lib for random number
+//#include<chrono>	// lib for random number
+#include<sstream>
 #include "Distributed_System.h"
 using namespace std;
 
@@ -110,10 +114,6 @@ void Distributed_System::Receive_message(int k )  // k = index of Node in adjace
 					// do not push back a same message to an incoming edge ( node from where message had come)
 					if( Array[k].msg.node_number[i] != p->dest )	
 					{
-						//vector<int>::iterator it;
-						// it = find( Array[k].Outb.Message_Id.begin(),Array[k].Outb.Message_Id.end(),Array[k].msg.Message_Id[i]);
-
-						 // if( it == Array[k].Outb.Message_Id.end())  // If element not present in Outbox
 						{
 							
 							Array[k].Outb.Message_Id.push_back( Array[k].msg.Message_Id[i]);
@@ -126,35 +126,31 @@ void Distributed_System::Receive_message(int k )  // k = index of Node in adjace
 					}
 					p = p->next;
 				}
-
-				//**************************** Different ways of deleting element from Vector**************************************
-
 				
-				//Array[k].msg.Message_Id.erase(std::remove(Array[k].msg.Message_Id.begin(), Array[k].msg.Message_Id.end(), Array[k].msg.Message_Id[i]), Array[k].msg.Message_Id.end());
-				//Array[k].msg.msg_type.erase(std::remove(Array[k].msg.msg_type.begin(), Array[k].msg.msg_type.end(), Array[k].msg.msg_type[i]), Array[k].msg.msg_type.end());
-				//Array[k].msg.node_number.erase(std::remove(Array[k].msg.node_number.begin(), Array[k].msg.node_number.end(), Array[k].msg.node_number[i]), Array[k].msg.node_number.end());
-				//Array[k].msg.message.erase(std::remove(Array[k].msg.message.begin(), Array[k].msg.message.end(), Array[k].msg.message[i]), Array[k].msg.message.end());
-				//vec.erase(std::remove(vec.begin(), vec.end(), int_to_remove), vec.end());
-				
-				//Array[k].msg.Message_Id.erase(Array[k].msg.Message_Id.begin() + 0);
-				//Array[k].msg.Message_Id.erase(Array[k].msg.msg_type.begin() + 0);
-				//Array[k].msg.Message_Id.erase(Array[k].msg.node_number.begin() + 0);
-				//Array[k].msg.Message_Id.erase(Array[k].msg.message.begin() + 0);
-				
-				//Array[k].msg.Message_Id.clear();
-				//Array[k].msg.msg_type.clear();
-				//Array[k].msg.node_number.clear();
-				//Array[k].msg.message.clear();
-
 			}
-			else if( Array[k].msg.msg_type[i].compare("Temperature_Read") == 0)
+			else if( Array[k].msg.msg_type[i].compare("Random_Number") == 0)
 			{
+				
+			// data type conversion of Array[k].msg.rand_num[i] from string to float
+				stringstream ss;
+				float rand_num;
+				ss << Array[k].msg.message[i];
+				ss >> rand_num;
 
-			
+				if ( Array[k].Mark )
+				{
+					// If Node is willing to be part of MIS..then check for rand_num
+					if( Array[k].rand_num > rand_num )
+					{
+						// node can't become part of MIS since rand_num value is greater than at least one of the neighbour
+						Array[k].Mark = false;    
+						
+					}
+				}
 			}
-			else if( Array[k].msg.msg_type[i].compare("Node_Id") == 0)
+			else if( Array[k].msg.msg_type[i].compare("color") == 0)
 			{
-
+				Array[k].color = Array[k].msg.message[i];
 			
 			}
 			else if( Array[k].msg.msg_type[i].compare("Node_Count") == 0)
@@ -307,7 +303,7 @@ void Distributed_System::Display_msg(int k)   // k is a index of node Array[k]
 {
 	for( int i = 0; i < Array[k].msg.message.size(); i++)
 	{
-	 cout << "  " << Array[k].Node_ID << "\t \t" << Array[k].msg.Message_Id[i] << " \t       " << Array[k].msg.msg_type[i] << "  \t" << Array[Array[k].msg.node_number[i]].Node_ID << " \t \t" << Array[k].msg.message[i] << endl;
+		cout << "  " << Array[k].Node_ID << "\t \t" << Array[k].msg.Message_Id[i] << " \t       " << Array[k].msg.msg_type[i] << "  \t" << Array[Array[k].msg.node_number[i]].Node_ID << " \t \t" << Array[k].msg.message[i] << endl;
 		cout << endl;
 	}
 }
@@ -327,7 +323,6 @@ void Distributed_System::Simulation( int R)
 	// simulate for 'R' number of rounds
 	for( int i = 0; i < R; i++ )         
 	{
-
 		// Receive message & process it 
 		// k is the index of a Node in the Array e.g. Array[k]
 		
@@ -337,7 +332,7 @@ void Distributed_System::Simulation( int R)
 		// check message vector of node Array[k] and perform action as per 'msg_type'
 		for( int k = 0; k < size; k++ )          
 		{
-			Display_msg(k);
+			//Display_msg(k);
 			Receive_message( k );			
 		}
 
@@ -353,7 +348,7 @@ void Distributed_System::Simulation( int R)
 			Array[k].Outb.node_number.clear();
 			Array[k].Outb.message.clear();
 		}
-				
+		
 		// Initiate activity like broadcast, convergecast
 
 		for( int k = 0; k < size; k++ )          
@@ -370,7 +365,7 @@ void Distributed_System::Simulation( int R)
 							
 				cout << "************  CHOICES  ************" << endl;
 				cout << "1. Broadcast " << endl;
-				cout << "2. Convergecast " << endl << endl;
+				cout << "2. Maximal Independent Set " << endl << endl;
 				cout << "Enter Your choice " << endl;
 				cin>>choice;
 							
@@ -398,8 +393,109 @@ void Distributed_System::Simulation( int R)
 							break;
 						}
 					case 2:
-						{
-							// call convergecast
+						{	
+						// **************Maximal Independent Set******************//
+							int round = 3;
+							// Uncolor all nodes
+							for( int i = 0; i < size; i++)
+							{
+								Array[i].color = "white";
+								Array[i].Mark = true;						// initially each node wanted to be a part of MIS 
+							}
+
+							// Generate random number and Send it to neighbours
+							for( int j = 0; j < size; j++ )
+							{
+								// generating random number using rand() fuction
+								float x = (j+1)*round*rand();
+								Array[j].rand_num = x;
+								string msg_type = "Random_Number";
+									
+								AdjListNode *p = Array[j].head;
+								
+								// Data type conversion of " Array[j].rand_num " from float to string
+								stringstream ss;
+								ss << Array[j].rand_num;
+								std::string s( ss.str() );
+								
+								// "s" is message string of " Array[j].rand_num "  
+								while( p != NULL )
+								{
+									int Message_Id = j*round;
+						
+									Send_message( j, p->dest, msg_type, Message_Id , s ); 
+									p = p->next;
+								}
+							}
+
+							// Receive Random  number from neighbours
+							for( int m = 0 ; m < size; m++ )
+							{
+								Receive_message( m );
+							}
+
+							// Colour Marked node with "red" colour
+							for( int k = 0; k < size; k++ )
+							{
+								if( Array[k].Mark )
+								{
+									Array[k].color = "red" ;
+									
+									AdjListNode *p = Array[k].head;
+										
+									while( p != NULL )
+									{
+										int Message_Id = rand()*(k+1);
+										// informing to neighbours to color themselves with "blue" color 
+										Send_message(k, p->dest, "color", Message_Id, "blue");
+										p = p->next;
+									}
+								}
+								else
+								{
+									if( Array[k].color.compare("white") == 0)
+									{	
+										Array[k].color = "red";
+									}
+									else 
+									{
+										Array[k].color = "blue";
+									}
+								}
+							}
+
+							// neighbours color themselves with "blue" color					
+								
+							for( int k = 0; k < size; k++ )
+							{
+								Receive_message(k);
+							}
+							
+							// Display_graph after executing the above MIS algorithm
+						
+							cout << " NODE ID " << "   " << "NODE COLOR " << "   " << "Adjacent Node ID " << "   " << "Adjacent Node Colour "<<endl;
+
+							for( int  l = 0; l < size; l++ )
+							{
+			
+								AdjListNode *p;
+								p = Array[l].head;
+								if( p )
+								{
+								
+									while( p != NULL )
+									{
+										cout << Array[l].Node_ID << "\t\t" << Array[l].color << "\t\t" << Array[p->dest].Node_ID << " \t \t" << Array[p->dest].color << endl;
+										p = p->next;
+									}
+								}
+								else
+								{
+									cout << Array[l].Node_ID << "\t\t" << Array[l].color  << endl;
+								}
+								 
+							}
+							
 							break;
 						}			
 					default: 
@@ -408,9 +504,7 @@ void Distributed_System::Simulation( int R)
 							break;
 						}
 				}
-		
 			}
 		}
-
 	}
 }

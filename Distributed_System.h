@@ -29,11 +29,14 @@ class Node
 {
 	
 	public:
-		AdjListNode *head;
-		int	 Node_ID;
+		AdjListNode		*head;
+			int		 	Node_ID;
+			int		rand_num;
+			std::string color;
+			bool 		Mark;
 	
-		Message msg;
-		Outbox Outb;
+			Message 	msg;
+			Outbox 		Outb;
 };
 
 class Distributed_System
